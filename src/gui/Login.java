@@ -2,16 +2,17 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
 public class Login extends JPanel {
     private GridBagConstraints c = new GridBagConstraints();
 
     // Needed to query database and log the user in or register new credentials into the database
-    private JTextField username = new JTextField(15);
-    private JTextField password = new JTextField(15);
+    private CustomEntry username = new CustomEntry("Username");
+    private CustomEntry password = new CustomEntry("Password");
     private JButton loginBtn = new JButton("Login");
 
-    public JButton switchToReg = new JButton("Register");
+    public JLabel switchToReg = new JLabel("<html><u>Register</u></html>");
     //private JLabel warning = new JLabel("");
 
     public Login() {
@@ -20,11 +21,6 @@ public class Login extends JPanel {
         JLabel loginLabel = new JLabel("Login");
         loginLabel.setFont(new Font("Sans Serif", Font.PLAIN, 32));
 
-        // JLabel usernameLabel = new JLabel("Username");
-        // usernameLabel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
-
-        // JLabel passwordLabel = new JLabel("Password");
-        // passwordLabel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
 
         this.loginBtn.addActionListener((e) -> {
             // TODO - Authenticate user by querying database
@@ -44,12 +40,18 @@ public class Login extends JPanel {
 
         
         this.c.gridy = 5;
+        this.c.weighty = 1;
         this.add(this.loginBtn, c);
 
         this.c.gridy = 10;
         this.add(this.switchToReg, c);
 
-        
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                requestFocusInWindow();
+            }
+        });
 
     }
 
