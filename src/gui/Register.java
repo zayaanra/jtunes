@@ -11,8 +11,7 @@ public class Register extends JPanel {
     private CustomEntry password = new CustomEntry("Password");
     private CustomEntry confirmation = new CustomEntry("Confirm Password");
 
-    private JButton registerBtn = new JButton("Register");
-
+    public JButton registerBtn = new JButton("Register");
     public JLabel switchToLog = new JLabel("<html><u>Login</u></html>");
 
     public Register() {
@@ -21,9 +20,7 @@ public class Register extends JPanel {
         JLabel registerLabel = new JLabel("Register");
         registerLabel.setFont(new Font("Sans Serif", Font.PLAIN, 32));
 
-        this.registerBtn.addActionListener((e) -> {
-            // TOOD - Register credentials into the database
-        });
+
 
         this.c.gridx = 0;
         this.c.gridy = 0;

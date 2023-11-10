@@ -10,8 +10,8 @@ public class Login extends JPanel {
     // Needed to query database and log the user in or register new credentials into the database
     private CustomEntry username = new CustomEntry("Username");
     private CustomEntry password = new CustomEntry("Password");
-    private JButton loginBtn = new JButton("Login");
-
+    
+    public JButton loginBtn = new JButton("Login");
     public JLabel switchToReg = new JLabel("<html><u>Register</u></html>");
     //private JLabel warning = new JLabel("");
 
