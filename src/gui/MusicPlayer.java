@@ -7,16 +7,17 @@ public class MusicPlayer extends JFrame {
 
     public MusicPlayer() {
         JPanel main = new JPanel(new BorderLayout());
+        
+        JPanel control = new Control();
 
-        ProgressBar pb = new ProgressBar();
-        //Control c = new Control();
-
-        main.add(pb, BorderLayout.SOUTH);
-        // main.add(c, BorderLayout.CENTER);
+        main.add(control, BorderLayout.SOUTH);
         main.setBackground(Color.GRAY);
 
+        // TODO - Set title name of the user
+
         this.add(main);
-        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+        //Toolkit.getDefaultToolkit().getScreenSize()
+        this.setSize(750, 500);
     }
 
 }

@@ -6,14 +6,39 @@ import java.awt.*;
 public class Control extends JPanel {
     
     public Control() {
-        // TODO - need reverse, play, pause, and forward images to act as icons
-        JButton reverse = new JButton("Reverse");
-        JButton play = new JButton("Play");
-        JButton forward = new JButton("Forward");
+        this.setLayout(new BorderLayout());
 
-        this.add(reverse);
-        this.add(play);
-        this.add(forward);
+        JSlider pb = new JSlider();
+        pb.setBackground(Color.BLACK);
+        pb.setSize(new Dimension(400, 50));
+
+        JButton prev = new JButton("⏮");
+        JButton play = new JButton("▶");
+        JButton next = new JButton("⏭");
+
+        prev.setForeground(Color.WHITE);
+        prev.setContentAreaFilled(false);
+        prev.setBorderPainted(false);
+        
+        play.setForeground(Color.WHITE);
+        play.setContentAreaFilled(false);
+        play.setBorderPainted(false);
+
+        next.setForeground(Color.WHITE);
+        next.setContentAreaFilled(false);
+        next.setBorderPainted(false);
+
+        JPanel centerGrid = new JPanel(new GridLayout(2, 1));
+        JPanel bottom = new JPanel();
+        bottom.add(prev);
+        bottom.add(play);
+        bottom.add(next);
+        bottom.setBackground(Color.BLACK);
+
+        centerGrid.add(pb);
+        centerGrid.add(bottom);
+
+        this.add(centerGrid);
         this.setBackground(Color.BLACK);
     }
     
