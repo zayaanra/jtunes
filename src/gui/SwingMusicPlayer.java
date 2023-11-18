@@ -3,9 +3,14 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 
-public class MusicPlayer extends JFrame {
+import api.MusicPlayer;
 
-    public MusicPlayer() {
+public class SwingMusicPlayer extends JFrame {
+    private MusicPlayer mp;
+
+    public SwingMusicPlayer() {
+        this.mp = new MusicPlayer();
+
         JPanel main = new JPanel(new BorderLayout());
         
         JPanel control = new Control();
@@ -13,7 +18,7 @@ public class MusicPlayer extends JFrame {
         main.add(control, BorderLayout.SOUTH);
         main.setBackground(Color.GRAY);
 
-        // TODO - Set title name of the user
+        // TODO - Set window title name of the user
 
         this.add(main);
         //Toolkit.getDefaultToolkit().getScreenSize()

@@ -11,8 +11,6 @@ public class Main extends JFrame {
     public Main() {
         this.setupCards();
 
-        // TODO - set up the actual music player
-
         this.setSize(300, 300);
         this.setResizable(false);
         this.setTitle("Login");
@@ -75,7 +73,7 @@ public class Main extends JFrame {
     public void setupMusicPlayer() {
         this.dispose();
 
-        MusicPlayer mp = new MusicPlayer();
+        SwingMusicPlayer mp = new SwingMusicPlayer();
         mp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mp.setVisible(true);
         
