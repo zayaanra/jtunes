@@ -8,7 +8,7 @@ public class Control extends JPanel {
     public Control() {
         this.setLayout(new BorderLayout());
 
-        JSlider pb = new JSlider();
+        JSlider pb = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
         pb.setBackground(Color.BLACK);
         pb.setSize(new Dimension(400, 50));
 
