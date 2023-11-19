@@ -22,7 +22,7 @@ public class SwingMusicPlayer extends JFrame {
     private JTable allSongs;
 
     private final String PLAYLISTS = "PLAYLISTS";
-    private PlaylistCard playlists;
+    private JPanel playlists;
 
     public SwingMusicPlayer() {
         this.mp = new MusicPlayer();
@@ -99,7 +99,26 @@ public class SwingMusicPlayer extends JFrame {
         JScrollPane songScroller = new JScrollPane(this.allSongs);
         
         // TODO - need to fetch database and display all songs and all playlists
-        this.playlists = new PlaylistCard();
+        this.playlists = new JPanel(new BorderLayout());
+        GridLayout gr = new GridLayout(1, 1);
+        JPanel gridPanel = new JPanel(gr);
+        
+
+        JButton create = new JButton("Create Playlist");
+        create.addActionListener((e) -> {
+            String playlistName = JOptionPane.showInputDialog("Enter Playlist Name");
+            if (playlistName != null && !playlistName.trim().isEmpty()) {
+                // TODO - fix playlists display
+                JComboBox<String> pl = new JComboBox<>();
+                pl.addItem(playlistName);
+                gridPanel.add(pl);
+                this.revalidate();
+                this.validate();
+                // TODO - add playlist to database
+            }
+        });
+        this.playlists.add(create, BorderLayout.NORTH);
+        this.playlists.add(gridPanel, BorderLayout.WEST);
         
         this.cards.add(songScroller, ALLSONGS);
         this.cards.add(playlists, PLAYLISTS);    
