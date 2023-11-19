@@ -58,19 +58,28 @@ public class SwingMusicPlayer extends JFrame {
         this.cards.add(allSongs, ALLSONGS);
         this.cards.add(playlists, PLAYLISTS);
 
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem uploadItem = new JMenuItem("Upload");
-        uploadItem.addActionListener((e) -> {
-            // TODO - Add song to database and update displayed song list
-            String songName = this.loadFile();
-            // TODO - if current card is ALLSONGS, call AllSongs.add()
+        // JMenuBar menuBar = new JMenuBar();
+        // JMenu fileMenu = new JMenu("File");
+        // JMenuItem uploadItem = new JMenuItem("Upload");
+        // uploadItem.addActionListener((e) -> {
+        //     // TODO - Add song to database and update displayed song list
+        //     String songName = this.loadFile();
+        //     // TODO - if current card is ALLSONGS, call AllSongs.add()
             
-            System.out.println(songName);
-        });
+        //     System.out.println(songName);
+        // });
 
-        fileMenu.add(uploadItem);
-        menuBar.add(fileMenu);
+        // fileMenu.add(uploadItem);
+        // menuBar.add(fileMenu);
+
+        /* TODO
+         * Basically, instead of letting the user upload music. 
+         * We can use Last.fm API.
+         * When a user searches an artist name, we will make a request to the API and get a response with lets say 10 tracks from that artist.
+         * Loop through the received tracks and update the GUI so that it displays those tracks.
+         * User can click some "Add song" button on one of the displayed tracks to add it to their list of songs. This will add the song to the database.
+         * The user can then choose to add the song to a playlist when in the "All Songs" tab of the nav. panel.
+         */
 
         main.add(navPanel, BorderLayout.WEST);
         main.add(control, BorderLayout.SOUTH);
@@ -79,7 +88,8 @@ public class SwingMusicPlayer extends JFrame {
 
         // TODO - Set window title name of the user
 
-        this.setJMenuBar(menuBar);
+        //this.setJMenuBar(menuBar);
+
         this.add(main);
 
         //Toolkit.getDefaultToolkit().getScreenSize()
@@ -87,21 +97,21 @@ public class SwingMusicPlayer extends JFrame {
     }
 
 
-	private String loadFile() {
-		String text = "";
-		// alternately, you can have it return
-		// a File object or file path String or whatever you
-		// like.
-		if (jc == null) jc = new JFileChooser("."); 
+	// private String loadFile() {
+	// 	String text = "";
+	// 	// alternately, you can have it return
+	// 	// a File object or file path String or whatever you
+	// 	// like.
+	// 	if (jc == null) jc = new JFileChooser("."); 
 		
-		int returnValue = jc.showOpenDialog(null);
+	// 	int returnValue = jc.showOpenDialog(null);
 
-		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = jc.getSelectedFile();
-			return selectedFile.getName();
+	// 	if (returnValue == JFileChooser.APPROVE_OPTION) {
+	// 		File selectedFile = jc.getSelectedFile();
+	// 		return selectedFile.getName();
 			
-		}
-		return "";
-	}
+	// 	}
+	// 	return "";
+	// }
 
 }
