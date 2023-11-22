@@ -33,7 +33,7 @@ public class Control extends JPanel {
         play.setBorderPainted(false);
         play.addActionListener((e) -> {
             if (this.allSongs.getRowCount() != 0) {
-                String songName = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
+                // String songName = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
             }
             // TODO - need to look up songName in database to get file associated with it
         });

@@ -1,11 +1,18 @@
 package gui;
 
 import java.awt.*;
-import java.io.File;
-
 import javax.swing.*;
-
 import javax.swing.table.*;
+
+import java.io.File;
+import java.lang.reflect.Field;
+
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.AudioHeader;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+
 
 import api.MusicPlayer;
 
@@ -37,13 +44,9 @@ public class SwingMusicPlayer extends JFrame {
         JMenu fileMenu = new JMenu("File");
         JMenuItem uploadItem = new JMenuItem("Upload");
         uploadItem.addActionListener((e) -> {
-            // TODO - Add song to database and update displayed song list
-            File song = this.loadFile();
-            if (song != null) {
-                Object[] row = {song.getName(), 0};
-                this.model.addRow(row);
-            }
-            //System.out.println(songName);
+            // TODO - Add song to database
+            this.processAudioFile();
+
         });
 
         fileMenu.add(uploadItem);
@@ -85,7 +88,7 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void displayUserData() {
-        Object[] columns = {"Song Title", "Length"};
+        Object[] columns = {"Song Title", "Artist", "Length"};
         this.model = new DefaultTableModel(columns, 0);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -93,6 +96,7 @@ public class SwingMusicPlayer extends JFrame {
         this.allSongs = new JTable(model);
         this.allSongs.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
         this.allSongs.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+         this.allSongs.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
         this.allSongs.setBackground(new Color(39, 41, 40));
         this.allSongs.setForeground(Color.WHITE);
         this.allSongs.setDefaultEditor(Object.class, null);
@@ -132,17 +136,24 @@ public class SwingMusicPlayer extends JFrame {
     }
 
 
-	private File loadFile() {
+	private void processAudioFile() {
 		if (jc == null) jc = new JFileChooser("."); 
 		
 		int returnValue = jc.showOpenDialog(null);
 
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = jc.getSelectedFile();
-			return selectedFile;
+			File audioFile = jc.getSelectedFile();
+			    try {
+                    AudioFile audio = AudioFileIO.read(audioFile);
+                    AudioHeader audioHeader = audio.getAudioHeader();
+                    String trackLength = String.format("%d:%02d", audioHeader.getTrackLength()/60, audioHeader.getTrackLength()%60);
+                    Tag tag = audio.getTag();
+                    Object[] row = {tag.getFirst(FieldKey.TITLE), tag.getFirst(FieldKey.ARTIST), trackLength};
+                    this.model.addRow(row);
+            } catch (Exception ex) {
+                System.err.println("Failed to read audio file");
+            }
 			
 		}
-		return null;
 	}
-
 }
