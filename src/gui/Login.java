@@ -8,8 +8,8 @@ public class Login extends JPanel {
     private GridBagConstraints c = new GridBagConstraints();
 
     // Needed to query database and log the user in or register new credentials into the database
-    private CustomEntry username = new CustomEntry("Username");
-    private CustomEntry password = new CustomEntry("Password");
+    private JTextField username = new JTextField(15);
+    private JPasswordField password = new JPasswordField(15);
     
     public JButton loginBtn = new JButton("Login");
     public JLabel switchToReg = new JLabel("<html><u>Register</u></html>");
@@ -24,6 +24,7 @@ public class Login extends JPanel {
 
         this.loginBtn.addActionListener((e) -> {
             // TODO - Authenticate user by querying database
+            // TODO - if password incorrect, display dialog saying password incorrect
         });
 
         this.c.gridx = 0;
@@ -36,6 +37,7 @@ public class Login extends JPanel {
         this.add(this.username, c);
 
         this.c.gridy = 2;
+        
         this.add(this.password, c);
 
         

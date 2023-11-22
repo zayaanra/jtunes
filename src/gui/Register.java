@@ -7,9 +7,9 @@ import java.awt.event.*;
 public class Register extends JPanel {
     private GridBagConstraints c = new GridBagConstraints();
 
-    private CustomEntry username = new CustomEntry("Username");
-    private CustomEntry password = new CustomEntry("Password");
-    private CustomEntry confirmation = new CustomEntry("Confirm Password");
+    private JTextField username = new JTextField(15);
+    private JPasswordField password = new JPasswordField(15);
+    private JPasswordField confirmation = new JPasswordField(15);
 
     public JButton registerBtn = new JButton("Register");
     public JLabel switchToLog = new JLabel("<html><u>Login</u></html>");
@@ -19,8 +19,6 @@ public class Register extends JPanel {
 
         JLabel registerLabel = new JLabel("Register");
         registerLabel.setFont(new Font("Sans Serif", Font.PLAIN, 32));
-
-
 
         this.c.gridx = 0;
         this.c.gridy = 0;
