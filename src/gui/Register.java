@@ -7,9 +7,9 @@ import java.awt.event.*;
 public class Register extends JPanel {
     private GridBagConstraints c = new GridBagConstraints();
 
-    private JTextField username = new JTextField(15);
-    private JPasswordField password = new JPasswordField(15);
-    private JPasswordField confirmation = new JPasswordField(15);
+    public JTextField username = new JTextField(15);
+    public JPasswordField password = new JPasswordField(15);
+    public JPasswordField confirmation = new JPasswordField(15);
 
     public JButton registerBtn = new JButton("Register");
     public JLabel switchToLog = new JLabel("<html><u>Login</u></html>");

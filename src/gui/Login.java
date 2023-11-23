@@ -8,8 +8,8 @@ public class Login extends JPanel {
     private GridBagConstraints c = new GridBagConstraints();
 
     // Needed to query database and log the user in or register new credentials into the database
-    private JTextField username = new JTextField(15);
-    private JPasswordField password = new JPasswordField(15);
+    public JTextField username = new JTextField(15);
+    public JPasswordField password = new JPasswordField(15);
     
     public JButton loginBtn = new JButton("Login");
     public JLabel switchToReg = new JLabel("<html><u>Register</u></html>");
@@ -20,12 +20,6 @@ public class Login extends JPanel {
 
         JLabel loginLabel = new JLabel("Login");
         loginLabel.setFont(new Font("Sans Serif", Font.PLAIN, 32));
-
-
-        this.loginBtn.addActionListener((e) -> {
-            // TODO - Authenticate user by querying database
-            // TODO - if password incorrect, display dialog saying password incorrect
-        });
 
         this.c.gridx = 0;
         this.c.gridy = 0;
