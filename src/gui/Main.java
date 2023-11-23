@@ -1,12 +1,21 @@
 package gui;
 
+import javax.swing.*;
+
 import java.awt.CardLayout;
 import java.awt.Cursor;
 import java.awt.event.*;
 
-import javax.swing.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import java.sql.SQLException;
+
+import api.DBManager;
 
 public class Main extends JFrame {
+
+    private DBManager manager;
 
     public Main() {
         this.setupCards();
@@ -19,10 +28,14 @@ public class Main extends JFrame {
     public void setupCards() {
         Main main = this;
 
+        // Cards used to switch between the Login and Register panel whenever users needs to
         JPanel cards = new JPanel(new CardLayout());
 
+        // Set up login and register panels
         Login login = new Login();
         Register register = new Register();
+
+        // Login and switch labels have some mouse listener so their the cursor changes when hovering over them
 
         login.switchToReg.addMouseListener(new MouseAdapter() {
             @Override
@@ -38,18 +51,7 @@ public class Main extends JFrame {
             }
         });
 
-        login.loginBtn.addActionListener((e) -> {
-            // TODO - Authenticate user by querying database
-            // TODO - escape SQL injection
-            this.setupMusicPlayer();
-
-        });
-
-        register.registerBtn.addActionListener((e) -> {
-            // TOOD - Register credentials into the database
-            // TODO - escape SQL injection
-        });
-
+        
         register.switchToLog.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -64,6 +66,54 @@ public class Main extends JFrame {
             }
         });
 
+        /*
+         * Whenever user hits the button, a connection is made to the DB instance using DBManager(). We'll either authenticate/login the user or register new credentials
+         * into the new DB.
+         */
+
+        login.loginBtn.addActionListener((e) -> {
+            String username = login.username.getText();
+            String password = String.valueOf(login.password.getPassword());
+            // TODO - better way of creating DBManagers?
+            manager = new DBManager(username, password);
+            // If the given username doesn't exist, show a warning.
+            try {
+                if(!manager.authenticate()) {
+                    JOptionPane.showMessageDialog(new JFrame(), "Login failed. It's possible that the username does not exist or you entered your password incorrectly.");
+                } else {
+                    this.setupMusicPlayer();
+                }
+            } catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
+                System.err.println(ex);
+            }
+        });
+
+        register.registerBtn.addActionListener((e) -> {
+            String username = register.username.getText();
+            String password = String.valueOf(register.password.getPassword());
+            String confirmed = String.valueOf(register.confirmation.getPassword());
+            // If the given username or password is too short, show a warning.
+            // If the password doesn't match the confirmed password, show a warning.
+            if (username.length() < 5 || password.length() < 5) {
+                JOptionPane.showMessageDialog(new JFrame(), "Username or Password too short! They both should be greater than 5 characters in length.");
+            } else if (!password.equals(confirmed)) {
+                JOptionPane.showMessageDialog(new JFrame(), "Passwords do not match!");
+            } else {
+                manager = new DBManager(username, password);
+                try {
+                    if (!manager.register()) {
+                        manager = null;
+                        JOptionPane.showMessageDialog(new JFrame(), "Something went wrong. It's likely that you tried registering under a username that's already taken.");
+                    } else {
+                        JOptionPane.showMessageDialog(new JFrame(), "Register successful!");
+                    }
+                } catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
+                    System.err.println(ex);
+                }
+            }
+        });
+
+
         cards.add(login);
         cards.add(register);
 
@@ -71,6 +121,8 @@ public class Main extends JFrame {
     }
 
     public void setupMusicPlayer() {
+        // We destroy the current frame. At this point, the user has been successfully authenticated and is allowed to access the actual JTunes GUI.
+
         this.dispose();
 
         SwingMusicPlayer mp = new SwingMusicPlayer();
