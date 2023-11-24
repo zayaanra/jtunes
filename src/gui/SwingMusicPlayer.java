@@ -56,7 +56,7 @@ public class SwingMusicPlayer extends JFrame {
             // If the user uploads a song, we'll process insert a new record into the DB representing that song
             Object[] row = this.processAudioFile();
             try {
-                new DBManager(this.username, "").insertSong(row);
+                new DBManager(this.username).insertSong(row);
             } catch (SQLException | FileNotFoundException ex) {
                 System.err.println(ex);
             }
@@ -105,6 +105,78 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void displayUserData() {
+        JScrollPane songScroller = this.setupSongDisplay();
+        
+        // TODO - need to fetch database and all playlists
+        this.playlists = new JPanel(new BorderLayout());
+
+
+        JPanel topPanel = new JPanel(new GridLayout(1, 2));
+
+        JComboBox<String> pl = new JComboBox<>();
+        try {
+            ArrayList<String> pnames = new DBManager(this.username).fetchPlaylists();
+            for (String pname : pnames) {
+                pl.addItem(pname);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        JPanel centerPanel = new JPanel(new CardLayout());
+
+        JButton create = new JButton("Create Playlist");
+        create.addActionListener((e) -> {
+            String playlistName = JOptionPane.showInputDialog("Enter Playlist Name");
+            if (playlistName != null && !playlistName.trim().isEmpty()) {
+                pl.addItem(playlistName);
+                Object[] columns = {"Title", "Artist", "Genre", "Year", "Length"};
+                DefaultTableModel pl_model = new DefaultTableModel(columns, 0);
+                JTable playlist = new JTable(pl_model);
+                DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+                centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+                playlist.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+                playlist.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+                playlist.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+                playlist.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+                playlist.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+                playlist.setBackground(new Color(39, 41, 40));
+                playlist.setForeground(Color.WHITE);
+                playlist.setDefaultEditor(Object.class, null);
+                // TODO - add playlist to database
+                try {                
+                    new DBManager(this.username).insertPlaylist(playlistName);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                centerPanel.add(playlist, playlistName);
+            }
+        });
+
+        pl.addActionListener((e) -> {
+            String playlistName = pl.getItemAt(pl.getSelectedIndex());
+            CardLayout c = (CardLayout) (centerPanel.getLayout());
+            c.show(centerPanel, playlistName);
+        });
+        
+        topPanel.add(create);
+        topPanel.add(pl);
+
+        this.playlists.add(topPanel, BorderLayout.NORTH);
+        this.playlists.add(centerPanel, BorderLayout.CENTER);
+        
+        this.cards.add(songScroller, ALLSONGS);
+        this.cards.add(playlists, PLAYLISTS);    
+
+        this.main.add(this.cards, BorderLayout.CENTER);
+    }
+
+    public void setupControlPanel() {
+        JPanel control = new Control(this.allSongs, this.username);
+        this.main.add(control, BorderLayout.SOUTH);
+    }
+
+    private JScrollPane setupSongDisplay() {
         // Give table model the appropriate columns
         Object[] columns = {"Title", "Artist", "Genre", "Year", "Length"};
         this.model = new DefaultTableModel(columns, 0);
@@ -121,49 +193,21 @@ public class SwingMusicPlayer extends JFrame {
         this.allSongs.setBackground(new Color(39, 41, 40));
         this.allSongs.setForeground(Color.WHITE);
         this.allSongs.setDefaultEditor(Object.class, null);
-        JScrollPane songScroller = new JScrollPane(this.allSongs);
-        
-        // TODO - need to fetch database and all playlists
-        this.playlists = new JPanel(new BorderLayout());
-        GridLayout gr = new GridLayout(1, 1);
-        JPanel gridPanel = new JPanel(gr);
 
         // Update the table of songs displayed for the user with all songs they have ever added
         try {
-            ArrayList<Object[]> rows = new DBManager(this.username, "").fetchUserSongs();
+            ArrayList<Object[]> rows = new DBManager(this.username).fetchUserSongs();
             for(Object[] row : rows) {
                 this.model.addRow(row);
             }
         } catch (SQLException ex) {
             System.err.println(ex);
         }
-
-        
-        JButton create = new JButton("Create Playlist");
-        create.addActionListener((e) -> {
-            String playlistName = JOptionPane.showInputDialog("Enter Playlist Name");
-            if (playlistName != null && !playlistName.trim().isEmpty()) {
-                // TODO - fix playlists display
-                JComboBox<String> pl = new JComboBox<>();
-                pl.addItem(playlistName);
-                gridPanel.add(pl);
-                this.revalidate();
-                this.validate();
-                // TODO - add playlist to database
-            }
-        });
-        this.playlists.add(create, BorderLayout.NORTH);
-        this.playlists.add(gridPanel, BorderLayout.WEST);
-        
-        this.cards.add(songScroller, ALLSONGS);
-        this.cards.add(playlists, PLAYLISTS);    
-
-        this.main.add(this.cards, BorderLayout.CENTER);
+        return new JScrollPane(this.allSongs);
     }
 
-    public void setupControlPanel() {
-        JPanel control = new Control(this.allSongs, this.username);
-        this.main.add(control, BorderLayout.SOUTH);
+    private void setupPlaylistDisplay() {
+
     }
 
 

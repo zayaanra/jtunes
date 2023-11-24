@@ -59,7 +59,7 @@ public class Control extends JPanel {
                     if (!selectedSong.equals(currentSong)) {
                         try {
                             this.currentSong = selectedSong;
-                            InputStream audio = new DBManager(this.username, "").fetchSong(this.currentSong);
+                            InputStream audio = new DBManager(this.username).fetchSong(this.currentSong);
                             if (audio != null) {
                                 // We only ever create a new Playback(audio) if it's a new song that's been selected.
                                 // This is more efficient than if we just kept querying and creating new playback threads (if the same song was selected).
