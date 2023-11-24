@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 import java.sql.SQLException;
-import java.sql.*;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -49,11 +48,12 @@ public class SwingMusicPlayer extends JFrame {
         this.displayUserData();
         this.setupControlPanel();
 
+        // Create menu bar needed to upload songs
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem uploadItem = new JMenuItem("Upload");
         uploadItem.addActionListener((e) -> {
-            // TODO - Add song to database
+            // If the user uploads a song, we'll process insert a new record into the DB representing that song
             Object[] row = this.processAudioFile();
             try {
                 new DBManager(this.username, "").insertSong(row);
@@ -76,6 +76,7 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void setupNavPanel() {
+        // Set up "Songs" tab
         JPanel navPanel = new JPanel(new GridLayout(2, 1));
         JButton showSongs = new JButton("Songs");
         showSongs.setForeground(Color.WHITE);
@@ -86,6 +87,7 @@ public class SwingMusicPlayer extends JFrame {
             c.show(this.cards, ALLSONGS);
         });
 
+        // Set up "Playlists" tab
         JButton showPlaylists = new JButton("Playlists");
         showPlaylists.setForeground(Color.WHITE);
         showPlaylists.setContentAreaFilled(false);
@@ -103,6 +105,7 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void displayUserData() {
+        // Give table model the appropriate columns
         Object[] columns = {"Title", "Artist", "Genre", "Year", "Length"};
         this.model = new DefaultTableModel(columns, 0);
 
@@ -159,12 +162,14 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void setupControlPanel() {
-        JPanel control = new Control(this.allSongs);
+        JPanel control = new Control(this.allSongs, this.username);
         this.main.add(control, BorderLayout.SOUTH);
     }
 
 
 	private Object[] processAudioFile() {
+        // Process the MP3 file the user has selected.
+
 		if (jc == null) jc = new JFileChooser("."); 
 		
 		int returnValue = jc.showOpenDialog(null);
