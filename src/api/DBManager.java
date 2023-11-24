@@ -2,6 +2,7 @@ package api;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.naming.spi.DirStateFactory.Result;
 
 import java.sql.*;
 
@@ -21,6 +22,10 @@ public class DBManager {
     private String password;
 
     // TODO - Should this class be run in its own thread?
+
+    public DBManager(String username) {
+        this.username = username;
+    }
 
     public DBManager(String username, String password) {
         this.username = username;
@@ -226,6 +231,53 @@ public class DBManager {
             return null;
         } catch (SQLException ex) {
             System.err.println(ex);
+        } finally {
+            conn.close();
+        }
+        return null;
+    }
+
+    public void insertPlaylist(String playlistName) throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            query = "INSERT INTO Playlists (uid, pname) SELECT uid, ? as pname FROM Users WHERE username = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, playlistName);
+            preparedStatement.setString(2, this.username);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            conn.close();
+        }
+    }
+
+    public ArrayList<String> fetchPlaylists() throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            query = "SELECT pname FROM Playlists NATURAL JOIN Users WHERE username = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, this.username);
+
+            ArrayList<String> pnames = new ArrayList<>();
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String playlistName = resultSet.getString("pname");
+                pnames.add(playlistName);
+            }    
+            return pnames;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         } finally {
             conn.close();
         }
