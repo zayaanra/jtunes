@@ -11,8 +11,12 @@ import java.security.spec.KeySpec;
 
 import java.util.*;
 
+import java.io.*;
+
 public class DBManager {
     private final String JDBC_URL = "jdbc:mysql://instance-csgy-6083.cu7elpgf7g3u.us-east-2.rds.amazonaws.com:3306/jtunes";
+    private final String DB_PASSWORD = "i_}S-*cZ5gqh=Hq";
+
     private String username;
     private String password;
 
@@ -32,7 +36,7 @@ public class DBManager {
 
             // We first check if the username already exists. If it does, the username cannot be re-registered. We'll prompt the user.
             // TODO - check if password leak is allowed here
-            conn = DriverManager.getConnection(this.JDBC_URL, "admin", "i_}S-*cZ5gqh=Hq");
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
             //Class.forName("com.mysql.cj.jdbc.Drive");
 
             query = "SELECT * FROM Users WHERE username = ?";
@@ -83,7 +87,7 @@ public class DBManager {
 
             // We'll fetch the username from the database. If the username doesn't exist, then we'll prompt the user.
             // Assuming it does exist, we'll compare the given password and the hashed password in the database. If both match, the user is successfully authenticated.
-            conn = DriverManager.getConnection(this.JDBC_URL, "admin", "i_}S-*cZ5gqh=Hq");
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
             query = "SELECT * FROM Users WHERE username = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
@@ -117,5 +121,87 @@ public class DBManager {
             }
         }
         return true;
+    }
+
+    public void insertSong(Object[] row) throws SQLException, FileNotFoundException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            // Get fields necessary to insert the new song
+            String title = String.valueOf(row[0]);
+            String artist = String.valueOf(row[1]);
+            String genre = String.valueOf(row[2]);
+            String length = String.valueOf(row[3]);
+            int year = (int) (row[4]);
+            File audioFile = (File) row[5];
+
+            // System.out.println(title);
+            // System.out.println(artist);
+            // System.out.println(genre);
+            // System.out.println(length);
+            // System.out.println(year);
+            // System.out.println(audioFile);
+
+            // Read bytes of the MP3 file
+            InputStream inputStream = new FileInputStream(audioFile);
+
+            // Insert the new song
+            query = "INSERT INTO Songs (title, artist, genre, length, yr, audiofile) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, title);
+            preparedStatement.setString(2, artist);
+            preparedStatement.setString(3, genre);
+            preparedStatement.setString(4, length);
+            preparedStatement.setInt(5, year);
+            preparedStatement.setBinaryStream(6, inputStream, audioFile.length());
+            preparedStatement.executeUpdate();
+
+            // Insert into UserSongs (uid, sid)
+            query = "INSERT INTO UserSongs (uid, sid) SELECT uid, (SELECT MAX(sid) FROM Songs) FROM Users WHERE username = ?";
+            preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, this.username);
+            preparedStatement.executeUpdate();
+        } catch (SQLException | FileNotFoundException ex) {
+            System.err.println(ex);
+        } finally {
+            conn.close();
+        }
+    }
+    
+    public ArrayList<Object[]> fetchUserSongs() throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            // Grab all songs associated with the given user and return it
+            query = "SELECT title, artist, genre, yr, length FROM Users NATURAL JOIN UserSongs NATURAL JOIN Songs WHERE username = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, this.username);
+
+            ArrayList<Object[]> rows = new ArrayList<>();
+
+            // Loop through result set and get all user songs
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String title = resultSet.getString("title");
+                String artist = resultSet.getString("artist");
+                String genre = resultSet.getString("genre");
+                int yr = resultSet.getInt("yr");
+                String length = resultSet.getString("length");
+                Object[] row = {title, artist, genre, yr, length};
+                rows.add(row);
+            }    
+            return rows;
+        } catch (SQLException ex) {
+            System.err.println(ex);
+        } finally {
+            conn.close();
+        }
+        return null;
     }
 }
