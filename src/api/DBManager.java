@@ -3,6 +3,8 @@ package api;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.mysql.cj.x.protobuf.MysqlxPrepare.Prepare;
+
 import java.sql.*;
 
 import java.security.*;
@@ -197,6 +199,33 @@ public class DBManager {
                 rows.add(row);
             }    
             return rows;
+        } catch (SQLException ex) {
+            System.err.println(ex);
+        } finally {
+            conn.close();
+        }
+        return null;
+    }
+
+    public InputStream fetchSong(String songName) throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            query = "SELECT audiofile FROM Users NATURAL JOIN UserSongs NATURAL JOIN Songs WHERE username = ? AND title = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, this.username);
+            preparedStatement.setString(2, songName);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getBinaryStream("audiofile");
+            }
+
+            return null;
         } catch (SQLException ex) {
             System.err.println(ex);
         } finally {
