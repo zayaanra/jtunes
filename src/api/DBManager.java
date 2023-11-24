@@ -3,8 +3,6 @@ package api;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import com.mysql.cj.x.protobuf.MysqlxPrepare.Prepare;
-
 import java.sql.*;
 
 import java.security.*;
