@@ -5,7 +5,12 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.io.FileNotFoundException;
+
+import java.util.*;
+
+import java.sql.SQLException;
+import java.sql.*;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -13,7 +18,7 @@ import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
-
+import api.DBManager;
 import api.MusicPlayer;
 
 public class SwingMusicPlayer extends JFrame {
@@ -31,7 +36,11 @@ public class SwingMusicPlayer extends JFrame {
     private final String PLAYLISTS = "PLAYLISTS";
     private JPanel playlists;
 
-    public SwingMusicPlayer() {
+    private String username;
+
+    public SwingMusicPlayer(String username) {
+        this.username = username;
+
         this.mp = new MusicPlayer();
         this.main = new JPanel(new BorderLayout());
         this.cards = new JPanel(new CardLayout());
@@ -45,7 +54,13 @@ public class SwingMusicPlayer extends JFrame {
         JMenuItem uploadItem = new JMenuItem("Upload");
         uploadItem.addActionListener((e) -> {
             // TODO - Add song to database
-            this.processAudioFile();
+            Object[] row = this.processAudioFile();
+            try {
+                new DBManager(this.username, "").insertSong(row);
+            } catch (SQLException | FileNotFoundException ex) {
+                System.err.println(ex);
+            }
+            
 
         });
 
@@ -55,8 +70,8 @@ public class SwingMusicPlayer extends JFrame {
 
         this.main.setBackground(Color.GRAY);
         this.add(main);
-        // TODO - Set window title name of the user
         //Toolkit.getDefaultToolkit().getScreenSize()
+        this.setTitle(this.username);
         this.setSize(750, 500);
     }
 
@@ -88,26 +103,39 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void displayUserData() {
-        Object[] columns = {"Song Title", "Artist", "Length"};
+        Object[] columns = {"Title", "Artist", "Genre", "Year", "Length"};
         this.model = new DefaultTableModel(columns, 0);
 
+        // Customize table that is used to display songs/playlists.
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         this.allSongs = new JTable(model);
         this.allSongs.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
         this.allSongs.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
-         this.allSongs.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        this.allSongs.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        this.allSongs.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        this.allSongs.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
         this.allSongs.setBackground(new Color(39, 41, 40));
         this.allSongs.setForeground(Color.WHITE);
         this.allSongs.setDefaultEditor(Object.class, null);
         JScrollPane songScroller = new JScrollPane(this.allSongs);
         
-        // TODO - need to fetch database and display all songs and all playlists
+        // TODO - need to fetch database and all playlists
         this.playlists = new JPanel(new BorderLayout());
         GridLayout gr = new GridLayout(1, 1);
         JPanel gridPanel = new JPanel(gr);
-        
 
+        // Update the table of songs displayed for the user with all songs they have ever added
+        try {
+            ArrayList<Object[]> rows = new DBManager(this.username, "").fetchUserSongs();
+            for(Object[] row : rows) {
+                this.model.addRow(row);
+            }
+        } catch (SQLException ex) {
+            System.err.println(ex);
+        }
+
+        
         JButton create = new JButton("Create Playlist");
         create.addActionListener((e) -> {
             String playlistName = JOptionPane.showInputDialog("Enter Playlist Name");
@@ -136,7 +164,7 @@ public class SwingMusicPlayer extends JFrame {
     }
 
 
-	private void processAudioFile() {
+	private Object[] processAudioFile() {
 		if (jc == null) jc = new JFileChooser("."); 
 		
 		int returnValue = jc.showOpenDialog(null);
@@ -144,16 +172,21 @@ public class SwingMusicPlayer extends JFrame {
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			File audioFile = jc.getSelectedFile();
 			    try {
+                    // Here, we read the metadata tags provided by the MP3 file.
+                    // However, the user MUST define these properties BEFORE uploading the MP3 file to Jtunes.
                     AudioFile audio = AudioFileIO.read(audioFile);
                     AudioHeader audioHeader = audio.getAudioHeader();
                     String trackLength = String.format("%d:%02d", audioHeader.getTrackLength()/60, audioHeader.getTrackLength()%60);
                     Tag tag = audio.getTag();
-                    Object[] row = {tag.getFirst(FieldKey.TITLE), tag.getFirst(FieldKey.ARTIST), trackLength};
+                    // TODO - Fix genre tag
+                    Object[] row = {tag.getFirst(FieldKey.TITLE), tag.getFirst(FieldKey.ARTIST), tag.getFirst(FieldKey.GENRE), tag.getFirst(FieldKey.YEAR), trackLength};
                     this.model.addRow(row);
+                    Object[] newRow = {tag.getFirst(FieldKey.TITLE), tag.getFirst(FieldKey.ARTIST), tag.getFirst(FieldKey.GENRE), trackLength, Integer.valueOf(tag.getFirst(FieldKey.YEAR)), audioFile};
+                    return newRow;
             } catch (Exception ex) {
                 System.err.println("Failed to read audio file");
             }
-			
 		}
+        return null;
 	}
 }

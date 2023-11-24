@@ -15,7 +15,7 @@ import api.DBManager;
 
 public class Main extends JFrame {
 
-    private DBManager manager;
+    //private DBManager manager;
 
     public Main() {
         this.setupCards();
@@ -74,14 +74,13 @@ public class Main extends JFrame {
         login.loginBtn.addActionListener((e) -> {
             String username = login.username.getText();
             String password = String.valueOf(login.password.getPassword());
-            // TODO - better way of creating DBManagers?
-            manager = new DBManager(username, password);
+            
             // If the given username doesn't exist, show a warning.
             try {
-                if(!manager.authenticate()) {
+                if(!new DBManager(username, password).authenticate()) {
                     JOptionPane.showMessageDialog(new JFrame(), "Login failed. It's possible that the username does not exist or you entered your password incorrectly.");
                 } else {
-                    this.setupMusicPlayer();
+                    this.setupMusicPlayer(username);
                 }
             } catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
                 System.err.println(ex);
@@ -99,10 +98,8 @@ public class Main extends JFrame {
             } else if (!password.equals(confirmed)) {
                 JOptionPane.showMessageDialog(new JFrame(), "Passwords do not match!");
             } else {
-                manager = new DBManager(username, password);
                 try {
-                    if (!manager.register()) {
-                        manager = null;
+                    if (!new DBManager(username, password).register()) {
                         JOptionPane.showMessageDialog(new JFrame(), "Something went wrong. It's likely that you tried registering under a username that's already taken.");
                     } else {
                         JOptionPane.showMessageDialog(new JFrame(), "Register successful!");
@@ -120,12 +117,12 @@ public class Main extends JFrame {
         this.add(cards);
     }
 
-    public void setupMusicPlayer() {
+    public void setupMusicPlayer(String username) {
         // We destroy the current frame. At this point, the user has been successfully authenticated and is allowed to access the actual JTunes GUI.
 
         this.dispose();
 
-        SwingMusicPlayer mp = new SwingMusicPlayer();
+        SwingMusicPlayer mp = new SwingMusicPlayer(username);
         mp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mp.setVisible(true);
         
