@@ -35,9 +35,9 @@ public class Control extends JPanel {
         pb.setBackground(Color.BLACK);
         pb.setSize(new Dimension(400, 50));
 
-        JButton prev = new JButton("⏮");
-        JButton play = new JButton("▶");
-        JButton next = new JButton("⏭");
+        JButton prev = new JButton("Previous");
+        JButton play = new JButton("Play");
+        JButton next = new JButton("Next");
         
         // TODO - play song depending on if user is on Songs or Playlists tab
 
@@ -49,8 +49,8 @@ public class Control extends JPanel {
         play.setContentAreaFilled(false);
         play.setBorderPainted(false);
         play.addActionListener((e) -> {
-            if (play.getText().equals("⏸")) {
-                play.setText("▶");
+            if (play.getText().equals("Stop")) {
+                play.setText("Play");
                 this.currentSong = null;
                 this.playback.pause();
             } else {
@@ -67,7 +67,7 @@ public class Control extends JPanel {
                                 // This is more efficient than if we just kept querying and creating new playback threads (if the same song was selected).
                                 this.playback = new Playback(audio, () -> {
                                     this.currentSong = null;
-                                    play.setText("▶");
+                                    play.setText("Play");
                                 });
                                 this.playback.play();
                             }
@@ -75,7 +75,7 @@ public class Control extends JPanel {
                             System.err.println(ex);
                         }
                     }
-                    play.setText("⏸");
+                    play.setText("Stop");
                 }   
             }
         });

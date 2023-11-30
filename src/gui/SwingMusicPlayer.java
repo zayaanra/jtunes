@@ -18,11 +18,8 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
 import api.DBManager;
-import api.MusicPlayer;
 
 public class SwingMusicPlayer extends JFrame {
-    private MusicPlayer mp;
-
     private final Object[] columns = {"Title", "Artist", "Genre", "Year", "Length"};
 
     private JPanel cards;
@@ -44,7 +41,6 @@ public class SwingMusicPlayer extends JFrame {
     public SwingMusicPlayer(String username) {
         this.username = username;
 
-        this.mp = new MusicPlayer();
         this.main = new JPanel(new BorderLayout());
         this.cards = new JPanel(new CardLayout());
         this.addMenu = new JMenu("Add to Playlist");
