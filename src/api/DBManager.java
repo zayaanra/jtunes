@@ -237,6 +237,41 @@ public class DBManager {
         return null;
     }
 
+    public void insertPlaylistSong(String playlistName, String songName) throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            PreparedStatement ps1 = conn.prepareStatement("SELECT pid FROM Playlists NATURAL JOIN Users WHERE pname = ? AND username = ?");
+            ps1.setString(1, playlistName);
+            ps1.setString(2, this.username);
+            ResultSet rs1 = ps1.executeQuery();
+
+            PreparedStatement ps2 = conn.prepareStatement("SELECT sid FROM UserSongs NATURAL JOIN Users NATURAL JOIN Songs WHERE username = ? AND title = ?");
+            ps2.setString(1, this.username);
+            ps2.setString(2, songName);
+            ResultSet rs2 = ps2.executeQuery();
+
+            rs1.next();
+            rs2.next();
+
+            int pid = rs1.getInt("pid");
+            int sid = rs2.getInt("sid");
+
+            query = "INSERT INTO PlaylistSongs (pid, sid) VALUES (?, ?)";
+            PreparedStatement ps3 = conn.prepareStatement(query);
+            ps3.setInt(1, pid);
+            ps3.setInt(2, sid);
+            ps3.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            conn.close();
+        }
+    }
+
     public void insertPlaylist(String playlistName) throws SQLException {
         Connection conn = null;
         try {
@@ -255,6 +290,39 @@ public class DBManager {
         } finally {
             conn.close();
         }
+    }
+
+    public ArrayList<Object[]> fetchSongsForPlaylist(String playlistName) throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            query = "SELECT title, artist, genre, yr, length FROM Users NATURAL JOIN Playlists NATURAL JOIN PlaylistSongs NATURAL JOIN Songs WHERE username = ? AND pname = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, this.username);
+            preparedStatement.setString(2, playlistName);
+
+            // Loop through all songs found for the specified playlists
+            ResultSet resultSet = preparedStatement.executeQuery();
+            ArrayList<Object[]> rows = new ArrayList<>();
+            while (resultSet.next()) {
+                String title = resultSet.getString("title");
+                String artist = resultSet.getString("artist");
+                String genre = resultSet.getString("genre");
+                int yr = resultSet.getInt("yr");
+                String length = resultSet.getString("length");
+                Object[] row = {title, artist, genre, yr, length};
+                rows.add(row);
+            }    
+            return rows;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            conn.close();
+        }
+        return null;
     }
 
     public ArrayList<String> fetchPlaylists() throws SQLException {
