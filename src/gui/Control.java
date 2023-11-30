@@ -38,6 +38,8 @@ public class Control extends JPanel {
         JButton prev = new JButton("⏮");
         JButton play = new JButton("▶");
         JButton next = new JButton("⏭");
+        
+        // TODO - play song depending on if user is on Songs or Playlists tab
 
         prev.setForeground(Color.WHITE);
         prev.setContentAreaFilled(false);
