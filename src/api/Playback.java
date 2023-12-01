@@ -15,7 +15,7 @@ public class Playback {
     private int status;
 
     private AdvancedPlayer player;
-    private Thread t;
+    public Thread t;
     
     public Playback(InputStream audio, Runnable f) throws JavaLayerException {
         try {
@@ -28,6 +28,14 @@ public class Playback {
             });
         } catch (JavaLayerException ex) {
             System.err.println(ex);
+        }
+    }
+
+    public void setAudio(InputStream audio) {
+        try {
+            this.player = new AdvancedPlayer(audio);
+        } catch (JavaLayerException ex) {
+            ex.printStackTrace();
         }
     }
 

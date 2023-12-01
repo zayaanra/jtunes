@@ -3,6 +3,7 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
+import java.awt.event.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,6 +25,7 @@ public class SwingMusicPlayer extends JFrame {
 
     private JPanel cards;
     private JPanel main;
+    private Control controlPanel;
     private DefaultTableModel model;
 
     JFileChooser jc;
@@ -35,6 +37,7 @@ public class SwingMusicPlayer extends JFrame {
     private JPanel playlists;
 
     private JMenu addMenu;
+    private JMenu qMenu;
 
     private String username;
 
@@ -44,6 +47,7 @@ public class SwingMusicPlayer extends JFrame {
         this.main = new JPanel(new BorderLayout());
         this.cards = new JPanel(new CardLayout());
         this.addMenu = new JMenu("Add to Playlist");
+        this.qMenu = new JMenu("Play From Queue?");
 
         this.setupNavPanel();
         this.displayUserData();
@@ -63,9 +67,26 @@ public class SwingMusicPlayer extends JFrame {
             }
         });
 
+        ButtonGroup g = new ButtonGroup();
+        JRadioButtonMenuItem y = new JRadioButtonMenuItem("Yes");
+        JRadioButtonMenuItem n = new JRadioButtonMenuItem("No");
+        y.addActionListener((e) -> {
+            this.controlPanel.setFromQueue(true);
+        });
+        n.addActionListener((e) -> {
+            this.controlPanel.setFromQueue(false);
+        });
+        
+        g.add(y);
+        g.add(n);
+
+        qMenu.add(y);
+        qMenu.add(n);
+
         fileMenu.add(uploadItem);
         menuBar.add(fileMenu);
         menuBar.add(this.addMenu);
+        menuBar.add(qMenu);
         this.setJMenuBar(menuBar);
 
         this.main.setBackground(Color.GRAY);
@@ -110,7 +131,7 @@ public class SwingMusicPlayer extends JFrame {
         this.playlists = new JPanel(new BorderLayout());
         
         // Top panel represents a bar which allows us to create a playlist.
-        // Bottom panel represents each playlist.
+        // Center panel represents each playlist.
         JPanel topPanel = new JPanel(new GridLayout(1, 2));
         JPanel centerPanel = new JPanel(new CardLayout());
 
@@ -207,8 +228,8 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void setupControlPanel() {
-        JPanel control = new Control(this.allSongs, this.username);
-        this.main.add(control, BorderLayout.SOUTH);
+        this.controlPanel = new Control(this.allSongs, this.username);
+        this.main.add(this.controlPanel, BorderLayout.SOUTH);
     }
 
     private JScrollPane setupSongDisplay() {
