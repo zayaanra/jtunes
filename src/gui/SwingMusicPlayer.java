@@ -3,10 +3,8 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import java.awt.event.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 
 import java.util.*;
 
@@ -23,7 +21,7 @@ import api.DBManager;
 public class SwingMusicPlayer extends JFrame {
     private final Object[] columns = {"Title", "Artist", "Genre", "Year", "Length"};
 
-    private JPanel cards;
+    private JPanel navCards;
     private JPanel main;
     private Control controlPanel;
     private DefaultTableModel model;
@@ -44,7 +42,7 @@ public class SwingMusicPlayer extends JFrame {
         this.username = username;
 
         this.main = new JPanel(new BorderLayout());
-        this.cards = new JPanel(new CardLayout());
+        this.navCards = new JPanel(new CardLayout());
         this.addMenu = new JMenu("Add to Playlist");
 
         this.setupNavPanel();
@@ -78,15 +76,17 @@ public class SwingMusicPlayer extends JFrame {
     }
 
     public void setupNavPanel() {
-        // Set up "Songs" tab
         JPanel navPanel = new JPanel(new GridLayout(2, 1));
+
+        // Set up "Songs" tab
         JButton showSongs = new JButton("Songs");
         showSongs.setForeground(Color.WHITE);
         showSongs.setContentAreaFilled(false);
         showSongs.setBorderPainted(false);
         showSongs.addActionListener((e) -> {
-            CardLayout c = (CardLayout)(this.cards.getLayout());
-            c.show(this.cards, ALLSONGS);
+            CardLayout c = (CardLayout)(this.navCards.getLayout());
+            c.show(this.navCards, ALLSONGS);
+            this.controlPanel.setPlaylist(null);
         });
 
         // Set up "Playlists" tab
@@ -95,8 +95,15 @@ public class SwingMusicPlayer extends JFrame {
         showPlaylists.setContentAreaFilled(false);
         showPlaylists.setBorderPainted(false);
         showPlaylists.addActionListener((e) -> {
-            CardLayout c = (CardLayout)(this.cards.getLayout());
-            c.show(this.cards, PLAYLISTS);
+            CardLayout c = (CardLayout)(this.navCards.getLayout());
+            c.show(this.navCards, PLAYLISTS);
+            this.allSongs.clearSelection();
+
+            // TODO - 
+            // JTable x = this.findTable(this.playlists);
+            // System.out.println(x);
+
+            // this.controlPanel.setPlaylist(x);
         });
 
         // Set up navigation panel
@@ -114,7 +121,7 @@ public class SwingMusicPlayer extends JFrame {
         
         // Top panel represents a bar which allows us to create a playlist.
         // Center panel represents each playlist.
-        JPanel topPanel = new JPanel(new GridLayout(1, 2));
+        JPanel topPanel = new JPanel(new GridLayout(1, 3));
         JPanel centerPanel = new JPanel(new CardLayout());
 
         // Playlists are represented through combo boxes.
@@ -187,17 +194,52 @@ public class SwingMusicPlayer extends JFrame {
                 centerPanel.add(new JScrollPane(playlist), pname);
             }
         });
+
+        JButton delete = new JButton("Delete Playlist");
+        delete.addActionListener((e) -> {
+            String pname = JOptionPane.showInputDialog("Enter Playlist Name for deletion");
+
+            int removalIdx = 0;
+
+            // Remove the playlist name from the addMenu
+            for(int i = 0; i < this.addMenu.getItemCount(); i++) {
+                if (this.addMenu.getItem(i).getText().equals(pname)) {
+                    this.addMenu.remove(i);
+                    removalIdx = i;
+                    break;
+                }
+            }
+
+            // Remove the playlist name from the playlist combo box
+            pl.removeItem(pname);
+
+            // Remove the respective component for the deleted playlist
+            if (pl.getItemCount() == 0) {
+                centerPanel.removeAll();
+            } else {
+                CardLayout c = (CardLayout) (centerPanel.getLayout());
+                c.removeLayoutComponent(centerPanel.getComponent(removalIdx));
+            }
+            
+            try {
+                new DBManager(this.username).deletePlaylist(pname);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+        });
         
         topPanel.add(create);
         topPanel.add(pl);
+        topPanel.add(delete);
 
         this.playlists.add(topPanel, BorderLayout.NORTH);
         this.playlists.add(centerPanel, BorderLayout.CENTER);
         
-        this.cards.add(songScroller, ALLSONGS);
-        this.cards.add(playlists, PLAYLISTS);    
+        this.navCards.add(songScroller, ALLSONGS);
+        this.navCards.add(playlists, PLAYLISTS);    
 
-        this.main.add(this.cards, BorderLayout.CENTER);
+        this.main.add(this.navCards, BorderLayout.CENTER);
     }
 
     public void setupControlPanel() {
@@ -222,6 +264,8 @@ public class SwingMusicPlayer extends JFrame {
         }
         return new JScrollPane(this.allSongs);
     }
+
+    // TODO - add rename operation for playlist
 
     private void setupPlaylistDisplay() {
 
@@ -258,6 +302,21 @@ public class SwingMusicPlayer extends JFrame {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public JTable findTable(JPanel p) {
+        // TODO - this doesnt work
+        for (Component c : p.getComponents()) {
+            if (c instanceof JPanel) {
+                JTable t = this.findTable((JPanel) c);
+                if (t != null) {
+                    return t;
+                }
+            } else if (c instanceof JTable) {
+                return (JTable)c;
+            }
+        }
+        return null;
     }
 
 

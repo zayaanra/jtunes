@@ -19,13 +19,16 @@ public class Control extends JPanel {
 
     private Playback playback;
 
+    private JTable playlist;
+
     public Control(JTable allSongs, String username) {
         this.setLayout(new BorderLayout());
 
         this.allSongs = allSongs;
         this.username = username;
+        this.playlist = null;
         
-        // This slider represents the progress of the song that's being played. (TODO)
+        // TODO - This slider represents the progress of the song that's being played.
         JSlider pb = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
         pb.setBackground(Color.BLACK);
         pb.setSize(new Dimension(400, 50));
@@ -48,13 +51,11 @@ public class Control extends JPanel {
             }
         });
 
-
-        JPanel centerGrid = new JPanel(new GridLayout(2, 1));
         JPanel bottom = new JPanel();
         bottom.add(play);
-
         bottom.setBackground(Color.BLACK);
 
+        JPanel centerGrid = new JPanel(new GridLayout(2, 1));
         centerGrid.add(pb);
         centerGrid.add(bottom);
 
@@ -63,8 +64,14 @@ public class Control extends JPanel {
     }
 
     public void setupPlayback() {
+        String selectedSong;
+        if (this.playlist == null) {
+            selectedSong = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
+        } else {
+            selectedSong = this.playlist.getModel().getValueAt(this.playlist.getSelectedRow(), 0).toString();
+        }
+        
         if (this.allSongs.getRowCount() != 0) {
-            String selectedSong = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
             // This condition prevents the DB from being queried so often.
             // Since we store MP3 files as MEDIUMBLOBS, it becomes quite inefficient to constantly fetch a MEDIUMBLOB.
             if (!selectedSong.equals(currentSong)) {
@@ -87,6 +94,10 @@ public class Control extends JPanel {
             }
             this.play.setText("Stop");
         }         
+    }
+
+    public void setPlaylist(JTable playlist) {
+        this.playlist = playlist;
     }
 
 }

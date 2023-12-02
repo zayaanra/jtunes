@@ -353,4 +353,40 @@ public class DBManager {
         }
         return null;
     }
+
+    public void deletePlaylist(String pname) throws SQLException {
+        Connection conn = null;
+        try {
+            String query;
+
+            conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
+
+            query = "SELECT uid FROM Users WHERE username = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, this.username);
+
+            ResultSet rs1 = preparedStatement.executeQuery();
+            rs1.next();
+            int uid = rs1.getInt("uid");
+            
+            query = "SELECT pid FROM Playlists WHERE uid = ? AND pname = ?";
+            preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setInt(1, uid);
+            preparedStatement.setString(2, pname);
+
+            ResultSet rs2 = preparedStatement.executeQuery();
+            rs2.next();
+            int pid = rs2.getInt("pid");
+
+            query = "DELETE FROM Playlists WHERE pid = ?";
+            preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setInt(1, pid);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            conn.close();
+        }
+    }
 }
