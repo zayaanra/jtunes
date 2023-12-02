@@ -2,13 +2,12 @@ package api;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.naming.spi.DirStateFactory.Result;
-
-import java.sql.*;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+
+import java.sql.*;
 
 import java.util.*;
 
@@ -237,7 +236,7 @@ public class DBManager {
         return null;
     }
 
-    public void insertPlaylistSong(String playlistName, String songName) throws SQLException {
+    public boolean insertPlaylistSong(String playlistName, String songName) throws SQLException {
         Connection conn = null;
         try {
             String query;
@@ -265,11 +264,14 @@ public class DBManager {
             ps3.setInt(1, pid);
             ps3.setInt(2, sid);
             ps3.executeUpdate();
+
+            return true;
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             conn.close();
         }
+        return false;
     }
 
     public void insertPlaylist(String playlistName) throws SQLException {
