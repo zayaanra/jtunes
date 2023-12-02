@@ -37,7 +37,6 @@ public class SwingMusicPlayer extends JFrame {
     private JPanel playlists;
 
     private JMenu addMenu;
-    private JMenu qMenu;
 
     private String username;
 
@@ -47,7 +46,6 @@ public class SwingMusicPlayer extends JFrame {
         this.main = new JPanel(new BorderLayout());
         this.cards = new JPanel(new CardLayout());
         this.addMenu = new JMenu("Add to Playlist");
-        this.qMenu = new JMenu("Play From Queue?");
 
         this.setupNavPanel();
         this.displayUserData();
@@ -67,26 +65,10 @@ public class SwingMusicPlayer extends JFrame {
             }
         });
 
-        ButtonGroup g = new ButtonGroup();
-        JRadioButtonMenuItem y = new JRadioButtonMenuItem("Yes");
-        JRadioButtonMenuItem n = new JRadioButtonMenuItem("No");
-        y.addActionListener((e) -> {
-            this.controlPanel.setFromQueue(true);
-        });
-        n.addActionListener((e) -> {
-            this.controlPanel.setFromQueue(false);
-        });
-        
-        g.add(y);
-        g.add(n);
-
-        qMenu.add(y);
-        qMenu.add(n);
 
         fileMenu.add(uploadItem);
         menuBar.add(fileMenu);
         menuBar.add(this.addMenu);
-        menuBar.add(qMenu);
         this.setJMenuBar(menuBar);
 
         this.main.setBackground(Color.GRAY);
@@ -157,20 +139,12 @@ public class SwingMusicPlayer extends JFrame {
                     pl_model.addRow(row);
                 }
                 pl.addItem(pname);
+
                 JMenuItem pitem = new JMenuItem(pname);
                 pitem.addActionListener((e) -> {
-                    try {
-                        String selectedSong = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
-                        Object[] row = new Object[this.allSongs.getColumnCount()];
-                        for (int c = 0; c < this.allSongs.getColumnCount(); c++) {
-                            row[c] = this.allSongs.getValueAt(this.allSongs.getSelectedRow(), c);
-                        }
-                        pl_model.addRow(row);
-                        new DBManager(this.username).insertPlaylistSong(pname, selectedSong);
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                    this.updatePlaylistTable(pl_model, pname);
                 });
+
                 this.addMenu.add(pitem);
                 centerPanel.add(new JScrollPane(playlist), pname);
             }
@@ -182,6 +156,15 @@ public class SwingMusicPlayer extends JFrame {
         JButton create = new JButton("Create Playlist");
         create.addActionListener((e) -> {
             String pname = JOptionPane.showInputDialog("Enter Playlist Name");
+
+            // Check for duplicate playlist names.
+            for (int i = 0; i < pl.getModel().getSize(); i++) {
+                if (pl.getModel().getElementAt(i).equals(pname)) {
+                    JOptionPane.showMessageDialog(this, "Playlist " + pname + " already exists");
+                    return;
+                }
+            }
+
             if (pname != null && !pname.trim().isEmpty()) {
                 // Create table to display specific playlist
                 pl.addItem(pname);
@@ -189,7 +172,7 @@ public class SwingMusicPlayer extends JFrame {
                 DefaultTableModel pl_model = new DefaultTableModel(this.columns, 0);
                 JTable playlist = constructTable(pl_model);
 
-                // Insert playlist into DB. Then, update AddToPlaylist menu and add as a card.
+                // Insert playlist into DB only if playlist doesn't already exist. Then, update AddToPlaylist menu and add as a card.
                 try {                
                     new DBManager(this.username).insertPlaylist(pname);
                 } catch (SQLException ex) {
@@ -197,17 +180,7 @@ public class SwingMusicPlayer extends JFrame {
                 }
                 JMenuItem pitem = new JMenuItem(pname);
                 pitem.addActionListener((e2) -> {
-                    try {
-                        String selectedSong = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
-                        Object[] row = new Object[this.allSongs.getColumnCount()];
-                        for (int c = 0; c < this.allSongs.getColumnCount(); c++) {
-                            row[c] = this.allSongs.getValueAt(this.allSongs.getSelectedRow(), c);
-                        }
-                        pl_model.addRow(row);
-                        new DBManager(this.username).insertPlaylistSong(pname, selectedSong);
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                    this.updatePlaylistTable(pl_model, pname);
                 });
 
                 this.addMenu.add(pitem);
@@ -270,7 +243,22 @@ public class SwingMusicPlayer extends JFrame {
         return table;
     }
 
-
+    public void updatePlaylistTable(DefaultTableModel pl_model, String pname) {
+        try {
+            String selectedSong = this.allSongs.getModel().getValueAt(this.allSongs.getSelectedRow(), 0).toString();
+            Object[] row = new Object[this.allSongs.getColumnCount()];
+            for (int c = 0; c < this.allSongs.getColumnCount(); c++) {
+                row[c] = this.allSongs.getValueAt(this.allSongs.getSelectedRow(), c);
+            }
+            if (new DBManager(this.username).insertPlaylistSong(pname, selectedSong)) {
+                pl_model.addRow(row);
+            } else {
+                JOptionPane.showMessageDialog(this, "Song " + selectedSong + " already exists in playlist " + pname);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
 
 
 	private Object[] processAudioFile() {
