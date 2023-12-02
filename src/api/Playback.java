@@ -13,9 +13,10 @@ public class Playback {
     public final int FINISHED = 2;
 
     public int status;
+    
+    public Thread t;
 
     private AdvancedPlayer player;
-    public Thread t;
     
     public Playback(InputStream audio, Runnable f) {
         try {
