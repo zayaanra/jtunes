@@ -98,12 +98,6 @@ public class SwingMusicPlayer extends JFrame {
             CardLayout c = (CardLayout)(this.navCards.getLayout());
             c.show(this.navCards, PLAYLISTS);
             this.allSongs.clearSelection();
-
-            // TODO - 
-            // JTable x = this.findTable(this.playlists);
-            // System.out.println(x);
-
-            // this.controlPanel.setPlaylist(x);
         });
 
         // Set up navigation panel
@@ -139,7 +133,10 @@ public class SwingMusicPlayer extends JFrame {
             pnames = new DBManager(this.username).fetchPlaylists();
             for (String pname : pnames) {
                 DefaultTableModel pl_model = new DefaultTableModel(this.columns, 0);
-                JTable playlist = constructTable(pl_model);        
+                JTable playlist = constructTable(pl_model);      
+                playlist.getSelectionModel().addListSelectionListener((e) -> {
+                    this.controlPanel.setPlaylist(playlist);
+                });
 
                 ArrayList<Object[]> rows = new DBManager(this.username).fetchSongsForPlaylist(pname);
                 for (Object[] row : rows) {
@@ -178,6 +175,9 @@ public class SwingMusicPlayer extends JFrame {
                 
                 DefaultTableModel pl_model = new DefaultTableModel(this.columns, 0);
                 JTable playlist = constructTable(pl_model);
+                playlist.getSelectionModel().addListSelectionListener((e2) -> {
+                    this.controlPanel.setPlaylist(playlist);
+                });
 
                 // Insert playlist into DB only if playlist doesn't already exist. Then, update AddToPlaylist menu and add as a card.
                 try {                
@@ -265,8 +265,6 @@ public class SwingMusicPlayer extends JFrame {
         return new JScrollPane(this.allSongs);
     }
 
-    // TODO - add rename operation for playlist
-
     private void setupPlaylistDisplay() {
 
     }
@@ -303,22 +301,6 @@ public class SwingMusicPlayer extends JFrame {
             ex.printStackTrace();
         }
     }
-
-    public JTable findTable(JPanel p) {
-        // TODO - this doesnt work
-        for (Component c : p.getComponents()) {
-            if (c instanceof JPanel) {
-                JTable t = this.findTable((JPanel) c);
-                if (t != null) {
-                    return t;
-                }
-            } else if (c instanceof JTable) {
-                return (JTable)c;
-            }
-        }
-        return null;
-    }
-
 
 	private Object[] processAudioFile() {
         // Process the MP3 file the user has selected.
