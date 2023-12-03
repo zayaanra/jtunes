@@ -17,7 +17,7 @@ public class DBManager {
     private final String JDBC_URL = "jdbc:mysql://instance-csgy-6083.cu7elpgf7g3u.us-east-2.rds.amazonaws.com:3306/jtunes";
     private final String DB_PASSWORD = "i_}S-*cZ5gqh=Hq";
 
-    private String username;
+    private final String username;
     private String password;
 
     // TODO - Should this class be run in its own thread?
