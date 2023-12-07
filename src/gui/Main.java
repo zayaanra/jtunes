@@ -21,7 +21,7 @@ public class Main extends JFrame {
         this.setupCards();
 
         this.setSize(300, 300);
-        this.setResizable(false);
+        this.setResizable(true);
         this.setTitle("Login");
     }
 

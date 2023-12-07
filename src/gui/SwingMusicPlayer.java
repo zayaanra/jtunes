@@ -175,6 +175,7 @@ public class SwingMusicPlayer extends JFrame {
                 
                 DefaultTableModel pl_model = new DefaultTableModel(this.columns, 0);
                 JTable playlist = constructTable(pl_model);
+                playlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                 playlist.getSelectionModel().addListSelectionListener((e2) -> {
                     this.controlPanel.setPlaylist(playlist);
                 });
@@ -282,6 +283,7 @@ public class SwingMusicPlayer extends JFrame {
         table.setBackground(new Color(39, 41, 40));
         table.setForeground(Color.WHITE);
         table.setDefaultEditor(Object.class, null);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         return table;
     }
 
