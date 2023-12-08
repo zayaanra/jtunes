@@ -27,6 +27,10 @@ public class Control extends JPanel {
         this.allSongs = allSongs;
         this.username = username;
         this.playlist = null;
+        
+        JSlider pb = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
+        pb.setBackground(Color.BLACK);
+        pb.setSize(new Dimension(400, 50));
 
         this.play = new JButton("Play");
         
@@ -49,6 +53,7 @@ public class Control extends JPanel {
         bottom.setBackground(Color.BLACK);
 
         JPanel centerGrid = new JPanel(new GridLayout(2, 1));
+        centerGrid.add(pb);
         centerGrid.add(bottom);
 
         this.add(centerGrid);
