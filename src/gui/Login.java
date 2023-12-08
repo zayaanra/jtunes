@@ -13,7 +13,6 @@ public class Login extends JPanel {
     
     public JButton loginBtn = new JButton("Login");
     public JLabel switchToReg = new JLabel("<html><u>Register</u></html>");
-    //private JLabel warning = new JLabel("");
 
     public Login() {
         this.setLayout(new GridBagLayout());

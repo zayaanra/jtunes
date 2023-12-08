@@ -20,8 +20,6 @@ public class DBManager {
     private final String username;
     private String password;
 
-    // TODO - Should this class be run in its own thread?
-
     public DBManager(String username) {
         this.username = username;
     }
@@ -39,9 +37,7 @@ public class DBManager {
             String query;
 
             // We first check if the username already exists. If it does, the username cannot be re-registered. We'll prompt the user.
-            // TODO - check if password leak is allowed here
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
-            //Class.forName("com.mysql.cj.jdbc.Drive");
 
             query = "SELECT * FROM Users WHERE username = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
@@ -142,13 +138,6 @@ public class DBManager {
             int year = (int) (row[4]);
             File audioFile = (File) row[5];
 
-            // System.out.println(title);
-            // System.out.println(artist);
-            // System.out.println(genre);
-            // System.out.println(length);
-            // System.out.println(year);
-            // System.out.println(audioFile);
-
             // Read bytes of the MP3 file
             InputStream inputStream = new FileInputStream(audioFile);
 
@@ -216,6 +205,7 @@ public class DBManager {
 
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
+            // Fetch the given song name from the DB
             query = "SELECT audiofile FROM Users NATURAL JOIN UserSongs NATURAL JOIN Songs WHERE username = ? AND title = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
             preparedStatement.setString(1, this.username);
@@ -243,11 +233,13 @@ public class DBManager {
 
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
+            // Get correct playlist to insert song into
             PreparedStatement ps1 = conn.prepareStatement("SELECT pid FROM Playlists NATURAL JOIN Users WHERE pname = ? AND username = ?");
             ps1.setString(1, playlistName);
             ps1.setString(2, this.username);
             ResultSet rs1 = ps1.executeQuery();
 
+            // Get correct sid for the given song name
             PreparedStatement ps2 = conn.prepareStatement("SELECT sid FROM UserSongs NATURAL JOIN Users NATURAL JOIN Songs WHERE username = ? AND title = ?");
             ps2.setString(1, this.username);
             ps2.setString(2, songName);
@@ -258,7 +250,8 @@ public class DBManager {
 
             int pid = rs1.getInt("pid");
             int sid = rs2.getInt("sid");
-
+            
+            // Insert the song into the playlist
             query = "INSERT INTO PlaylistSongs (pid, sid) VALUES (?, ?)";
             PreparedStatement ps3 = conn.prepareStatement(query);
             ps3.setInt(1, pid);
@@ -281,6 +274,7 @@ public class DBManager {
 
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
+            // Insert given playlist into DB
             query = "INSERT INTO Playlists (uid, pname) SELECT uid, ? as pname FROM Users WHERE username = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
             preparedStatement.setString(1, playlistName);
@@ -301,6 +295,7 @@ public class DBManager {
 
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
+            // Get the title, artist, genre, yr, and length of each song for the provided playlist for this user
             query = "SELECT title, artist, genre, yr, length FROM Users NATURAL JOIN Playlists NATURAL JOIN PlaylistSongs NATURAL JOIN Songs WHERE username = ? AND pname = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
             preparedStatement.setString(1, this.username);
@@ -334,6 +329,7 @@ public class DBManager {
 
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
+            // Fetch all playlists for the current user
             query = "SELECT pname FROM Playlists NATURAL JOIN Users WHERE username = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
             preparedStatement.setString(1, this.username);
@@ -361,6 +357,7 @@ public class DBManager {
 
             conn = DriverManager.getConnection(this.JDBC_URL, "admin", this.DB_PASSWORD);
 
+            // Find the uid for this user
             query = "SELECT uid FROM Users WHERE username = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(query);
             preparedStatement.setString(1, this.username);
@@ -369,6 +366,7 @@ public class DBManager {
             rs1.next();
             int uid = rs1.getInt("uid");
             
+            // Find the pid for the given playlist of this user
             query = "SELECT pid FROM Playlists WHERE uid = ? AND pname = ?";
             preparedStatement = conn.prepareStatement(query);
             preparedStatement.setInt(1, uid);
@@ -378,6 +376,7 @@ public class DBManager {
             rs2.next();
             int pid = rs2.getInt("pid");
 
+            // Delete the playlist
             query = "DELETE FROM Playlists WHERE pid = ?";
             preparedStatement = conn.prepareStatement(query);
             preparedStatement.setInt(1, pid);

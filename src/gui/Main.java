@@ -15,8 +15,6 @@ import api.DBManager;
 
 public class Main extends JFrame {
 
-    //private DBManager manager;
-
     public Main() {
         this.setupCards();
 

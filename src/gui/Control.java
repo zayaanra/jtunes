@@ -27,16 +27,9 @@ public class Control extends JPanel {
         this.allSongs = allSongs;
         this.username = username;
         this.playlist = null;
-        
-        // TODO - This slider represents the progress of the song that's being played.
-        JSlider pb = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
-        pb.setBackground(Color.BLACK);
-        pb.setSize(new Dimension(400, 50));
 
         this.play = new JButton("Play");
         
-        // TODO - play song depending on if user is on Songs or Playlists tab
-
         this.play.setForeground(Color.WHITE);
         this.play.setContentAreaFilled(false);
         this.play.setBorderPainted(false);
@@ -56,7 +49,6 @@ public class Control extends JPanel {
         bottom.setBackground(Color.BLACK);
 
         JPanel centerGrid = new JPanel(new GridLayout(2, 1));
-        centerGrid.add(pb);
         centerGrid.add(bottom);
 
         this.add(centerGrid);
